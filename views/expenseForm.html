@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track your expense</title> 
+    <link rel="stylesheet" href="/form.css">
+</head>
+<body>
+    <header class="main-header">
+        <h1>Expense App</h1>
+    </header>
+    <main>
+        <form action="/get-expense" method="POST" >
+            <div class="form-control">
+                <label>Expense:</label>
+                <input type="text" name="title" />
+                <label>Quantity:</label>
+                <input type="number" name="amount" />
+                <label>Price(in Rs):</label>
+                <input type="number" name="price" />
+                <button type="submit">Add Expense</button>
+            </div>
+        </form>
+        <ul id="expenses"></ul>
+    </main>
+    <script>
+        window.addEventListener('DOMContentLoaded', async ()=>{
+    try{
+        const res= await fetch('http://localhost:3000/get-expense')
+        const data= await res.json()
+        console.log(data)
+        if (data && data.allexpenses) {
+            data.allexpenses.forEach(expense => {
+                showExpense(expense)
+            });
+        }
+        const ul = document.getElementById('expenses');
+            ul.addEventListener('click', (event) => {
+                if (event.target.tagName === 'BUTTON') {
+                    console.log('clicked again')
+                    const li = event.target.parentElement;
+                    const expenseId = li.id;
+                    deleteExpense(expenseId);
+                }
+            })
+    }catch(err){
+        console.log(err)
+    }
+
+    function showExpense (expense){
+        const ul = document.getElementById('expenses');
+        const bttn=document.createElement('button')
+        bttn.id= 'del'
+        bttn.textContent= 'Delete'
+        const li = document.createElement('li');
+        li.id=expense.id
+        li.textContent = `Expense: ${expense.title}; Quantity: ${expense.amount}; Price: ${expense.price}`
+        li.appendChild(bttn)
+        ul.appendChild(li);
+    }
+
+    async function deleteExpense(id) {
+        try{
+            const ul = document.getElementById('expenses');
+            console.log('clicked')
+            const res = await fetch(`http://localhost:3000/delete-expense/${id}`, { method: 'DELETE' })
+            const data= await res.json()
+            if (data.success) {
+                setTimeout(() => {
+                const li = document.getElementById(id);
+                ul.removeChild(li);
+            }, 0);
+            }
+        }catch(err){
+            console.log(err)
+        }
+    }
+
+    
+})
+    </script>
+</body>
+</html>
